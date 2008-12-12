@@ -97,7 +97,7 @@ def generate_kpn(options):
 
     if options.nnodes <= 0:
         die('Invalid number of nodes: %d\n' %(options.nnodes))
-    if options.wprob < 0 or options.wprob > 1:
+    if options.wprob < 0 or options.wprob >= 1:
         die('Invalid write probablity: %f\n' %(options.wprob))
     if options.wsize < 0:
         die('Invalid write size: %d\n' %(options.wsize))
