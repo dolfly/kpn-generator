@@ -82,7 +82,7 @@ def gen_write_values(nodes, options):
     # 4. Round to integer values
     wsizes = round_to_integer_values(wsizes)
 
-    sys.stderr.write('Sum of communication values: %d (%d values)\n' %(sum(wsizes), len(wsizes)))
+    sys.stderr.write('Sum of communication bytes: %d (%d events)\n' %(sum(wsizes), len(wsizes)))
 
     i = 0
     for (nodeid, cmdi) in wevents:
@@ -114,7 +114,7 @@ def generate_kpn(options):
 
     ctimes = b_model_time_series(options.cb, options.ctime, options.cevents)
     ctimes = round_to_integer_values(ctimes)
-    sys.stderr.write('Sum of computation events: %d (%d events)\n' %(sum(ctimes), len(ctimes)))
+    sys.stderr.write('Sum of computation times: %d (%d events)\n' %(sum(ctimes), len(ctimes)))
 
     cevents = 0
     wevents = 0
@@ -134,9 +134,12 @@ def generate_kpn(options):
     if wevents > 0:
         gen_write_values(nodes, options)
 
+    ncommands = 0
     for node in nodes:
-        print node
-
-    for node in nodes:
+        ncommands += len(node.commands)
         if node.is_empty():
             sys.stderr.write('Node %d is empty\n' %(node.nodeid))
+    sys.stderr.write('%d commands\n' %(ncommands))
+
+    for node in nodes:
+        print node
