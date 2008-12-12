@@ -13,8 +13,37 @@ class Node:
         self.nodeid = nodeid
         self.commands = []
 
-    def cmd(self, cmd, parameter):
-        self.commands.append((cmd, parameter))
+    def compute(self, time):
+        self.commands.append((CMD_COMPUTATION, time))       
+
+    def is_empty(self):
+        return len(self.commands) == 0
+
+    def is_write(self, cmdi):
+        return self.commands[cmdi][0] == CMD_WRITE
+
+    def read(self, snodeid):
+        self.commands.append((CMD_READ, snodeid))
+
+    def set_write(self, cmdi, wsize):
+        (cmd, par) = self.commands[cmdi]
+        assert(cmd == CMD_WRITE)
+        (dnodeid, dontcare) = par
+        self.commands[cmdi] = (cmd, (dnodeid, wsize))
+
+    def write(self, dnodeid, wsize = None):
+        self.commands.append((CMD_WRITE, (dnodeid, wsize)))
+
+    def __str__(self):
+        l = ['node', str(self.nodeid), str(len(self.commands))]
+        for (cmd, par) in self.commands:
+            if cmd == CMD_COMPUTATION:
+                l += ['c', str(par)]
+            elif cmd == CMD_READ:
+                l += ['r', str(par)]
+            else:
+                l += ['w', str(par[0]), str(par[1])]
+        return ' '.join(l)
 
 def power_of_two(x):
     i = 1
@@ -30,7 +59,7 @@ def gen_write_values(nodes, options):
     for node in nodes:
         i = 0
         while i < len(node.commands):
-            if node.commands[i][0] == CMD_WRITE:
+            if node.is_write(i):
                 wevents.append((node.nodeid, i))
             i += 1
     shuffle(wevents)
@@ -57,8 +86,7 @@ def gen_write_values(nodes, options):
 
     i = 0
     for (nodeid, cmdi) in wevents:
-        node = nodes[nodeid]
-        node.commands[cmdi] = (CMD_WRITE, wsizes[i])
+        nodes[nodeid].set_write(cmdi, wsizes[i])
         i += 1
 
 def generate_kpn(options):
@@ -82,6 +110,8 @@ def generate_kpn(options):
 
     nodes = map(lambda i: Node(i), range(options.nnodes))
 
+    sys.stderr.write('%d nodes\n' %(options.nnodes))
+
     ctimes = b_model_time_series(options.cb, options.ctime, options.cevents)
     ctimes = round_to_integer_values(ctimes)
     sys.stderr.write('Sum of computation events: %d (%d events)\n' %(sum(ctimes), len(ctimes)))
@@ -89,13 +119,24 @@ def generate_kpn(options):
     cevents = 0
     wevents = 0
     while cevents < options.cevents:
-        rnode = nodes[randrange(0, len(nodes))]
+        rnodeid = randrange(0, len(nodes))
+        rnode = nodes[rnodeid]
         if random() < options.wprob:
-            rnode.cmd(CMD_WRITE, None)
+            dnodeid = randrange(0, len(nodes))
+            dnode = nodes[dnodeid]
+            dnode.read(rnodeid)
+            rnode.write(dnodeid)
             wevents += 1
         else:
-            rnode.cmd(CMD_COMPUTATION, ctimes[cevents])
+            rnode.compute(ctimes[cevents])
             cevents += 1
 
     if wevents > 0:
         gen_write_values(nodes, options)
+
+    for node in nodes:
+        print node
+
+    for node in nodes:
+        if node.is_empty():
+            sys.stderr.write('Node %d is empty\n' %(node.nodeid))
