@@ -118,8 +118,14 @@ def generate_kpn(options):
 
     cevents = 0
     wevents = 0
+    firstnode = True
     while cevents < options.cevents:
-        rnodeid = randrange(0, len(nodes))
+        if firstnode:
+            rnodeid = 0
+            firstnode = False
+        else:
+            rnodeid = randrange(0, len(nodes))
+
         rnode = nodes[rnodeid]
         if random() < options.wprob:
             dnodeid = randrange(0, len(nodes))
