@@ -2,7 +2,7 @@ from random import random, randrange, shuffle
 import sys
 
 from distributions import b_model_time_series
-from support import die
+from support import die, randrangexor
 
 CMD_COMPUTATION = 0
 CMD_READ = 1
@@ -128,7 +128,7 @@ def generate_kpn(options):
 
         rnode = nodes[rnodeid]
         if random() < options.wprob:
-            dnodeid = randrange(0, len(nodes))
+            dnodeid = randrangexor(0, len(nodes), rnodeid)
             dnode = nodes[dnodeid]
             dnode.read(rnodeid)
             rnode.write(dnodeid)
