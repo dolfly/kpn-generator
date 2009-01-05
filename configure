@@ -32,7 +32,7 @@ sed -e "s|{PREFIX}|$prefix|g" \
 pdir="$prefix/lib/kpn-generator"
 
 cat > kpn-generator <<EOF
-exec "$pdir/kpn-generator.py"
+exec "$pdir/kpn-generator.py" "\$@"
 EOF
 chmod a+rx kpn-generator
 
