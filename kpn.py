@@ -95,7 +95,7 @@ def generate_kpn(options):
     if power_of_two(options.cevents) != options.cevents:
         die('Not a power of two number of computation events: %d\n' %(options.cevents))
 
-    if options.nnodes <= 0:
+    if options.nnodes < 2:
         die('Invalid number of nodes: %d\n' %(options.nnodes))
     if options.wprob < 0 or options.wprob >= 1:
         die('Invalid write probablity: %f\n' %(options.wprob))
