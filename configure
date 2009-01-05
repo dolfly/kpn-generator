@@ -34,6 +34,7 @@ pdir="$prefix/lib/kpn-generator"
 cat > kpn-generator <<EOF
 exec "$pdir/kpn-generator.py"
 EOF
+chmod a+rx kpn-generator
 
 echo
 echo "Install path:    $prefix/bin"
