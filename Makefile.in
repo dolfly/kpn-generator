@@ -1,0 +1,11 @@
+PREFIX = {PREFIX}
+BINDIR = $(PREFIX)/bin
+PDIR = $(PREFIX)/lib/kpn-generator
+
+all:	
+
+install:	
+	install kpn-generator "$(BINDIR)/"
+	mkdir -m 755 -p "$(PDIR)"
+	install kpn-generator.py "$(PDIR)/"
+	install -m 644 distributions.py kpn.py support.py "$(PDIR)/"
