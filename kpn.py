@@ -191,5 +191,17 @@ def generate_kpn(options):
             sys.stderr.write('Node %d is empty\n' %(node.nodeid))
     sys.stderr.write('%d commands\n' %(ncommands))
 
-    for node in nodes:
-        print node
+    if options.dot:
+        write_dot(len(nodes), links)
+    else:
+        for node in nodes:
+            print node
+
+def write_dot(n, links):
+    sys.stdout.write('digraph kpn {\n')
+    for nodeid in xrange(n):
+        sys.stdout.write('\tnode%d [];\n' %(nodeid))
+    for nodeid in xrange(n):
+        for d in links[nodeid].keys():
+            sys.stdout.write('\tnode%d -> node%d;\n' %(nodeid, d))
+    sys.stdout.write('}\n')

@@ -18,6 +18,11 @@ def main():
                       default = 32,
                       metavar = 'C',
                       help = 'Set number of computation events C. C must be a power of two. The default is 32.')
+    parser.add_option('-d', '--dot',
+                      dest = 'dot',
+                      action = 'store_true',
+                      default = False,
+                      help = 'Output a Graphviz dot file')
     parser.add_option('-n', '--nodes',
                       dest = 'nnodes',
                       type = 'int', 
