@@ -20,9 +20,9 @@ def main():
                       help = 'Set number of computation events C. C must be a power of two. The default is 32.')
     parser.add_option('-d', '--dot',
                       dest = 'dot',
-                      action = 'store_true',
-                      default = False,
-                      help = 'Output a Graphviz dot file')
+                      default = None,
+                      metavar = 'f',
+                      help = 'Write a Graphviz dot file f')
     parser.add_option('-n', '--nodes',
                       dest = 'nnodes',
                       type = 'int', 
