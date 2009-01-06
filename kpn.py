@@ -89,6 +89,35 @@ def gen_write_values(nodes, options):
         nodes[nodeid].set_write(cmdi, wsizes[i])
         i += 1
 
+def ancestor(d, s, links):
+    """ DFS starting from node d, terminates when node s is encountered or
+    all reachable nodes from d have been visited. Returns True iff node s
+    is encountered, that is, d is an ancestor of s. """
+
+    visited = set()
+    lifo = [d]
+    while len(lifo) > 0:
+        node = lifo.pop()
+        if node in visited:
+            continue
+        visited.add(node)
+        if node == s:
+            return True
+        for child in links[node].keys():
+            lifo.append(child)
+
+    return False
+
+def acyclic_destination(s, nnodes, links):
+    dests = range(nnodes)
+    shuffle(dests)
+    for d in dests:
+        if d == s:
+            continue
+        if not ancestor(d, s, links):
+            return d
+    return None
+
 def generate_kpn(options):
     if options.cevents <= 0:
         die('Invalid number of computation events: %d\n' %(options.cevents))
@@ -116,26 +145,41 @@ def generate_kpn(options):
     ctimes = round_to_integer_values(ctimes)
     sys.stderr.write('Sum of computation times: %d (%d events)\n' %(sum(ctimes), len(ctimes)))
 
+    links = []
+    for nodeid in xrange(len(nodes)):
+        links.append({})
+
     cevents = 0
     wevents = 0
     firstnode = True
+    writelocked = False
     while cevents < options.cevents:
         if firstnode:
             rnodeid = 0
-            firstnode = False
         else:
             rnodeid = randrange(0, len(nodes))
 
         rnode = nodes[rnodeid]
-        if random() < options.wprob:
-            dnodeid = randrangexor(0, len(nodes), rnodeid)
+
+        if writelocked or random() < options.wprob:
+            writelocked = True
+            if options.acyclic:
+                dnodeid = acyclic_destination(rnodeid, len(nodes), links)
+            else:
+                dnodeid = randrangexor(0, len(nodes), rnodeid)
+            if dnodeid == None:
+                continue
+            writelocked = False
             dnode = nodes[dnodeid]
             dnode.read(rnodeid)
             rnode.write(dnodeid)
             wevents += 1
+            links[rnodeid][dnodeid] = None
         else:
             rnode.compute(ctimes[cevents])
             cevents += 1
+
+        firstnode = False
 
     if wevents > 0:
         gen_write_values(nodes, options)
