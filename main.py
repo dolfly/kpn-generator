@@ -11,7 +11,7 @@ def main():
                       dest = 'acyclic',
                       action = 'store_true',
                       default = False,
-                      help = 'Generate an acyclig graph. By default a cyclic graph is generated.')
+                      help = 'Generate an acyclic graph. By default a cyclic graph is generated.')
     parser.add_option('-c', '--computation-events',
                       dest = 'cevents',
                       type = 'int',
