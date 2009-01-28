@@ -47,6 +47,12 @@ def main():
                       default = 1024,
                       metavar = 'T',
                       help = 'Set total computation time T. The default is 1024.')
+    parser.add_option('--target-distribution',
+                      dest = 'tdist',
+                      default = None,
+                      type = 'float',
+                      metavar = 'p',
+                      help = 'Generate write targets from proportion p of nodes. p must be in range (0, 1]. The default is 1.0.')
     parser.add_option('-x', '--comp-b',
                       dest = 'cb',
                       type = 'float',

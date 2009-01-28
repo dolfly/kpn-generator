@@ -1,4 +1,4 @@
-from random import random, randrange, shuffle
+from random import choice, random, randrange, shuffle
 import sys
 
 from distributions import b_model_time_series
@@ -118,6 +118,24 @@ def acyclic_destination(s, nnodes, links):
             return d
     return None
 
+def gen_targets(n, options):
+    targets = {}
+    mvec = []
+    for rnodeid in xrange(n):
+        l = []
+        for dnodeid in xrange(n):
+            if dnodeid == rnodeid:
+                continue
+            l.append(dnodeid)
+        if options.tdist != None:
+            shuffle(l)
+            m = 1 + randrange(int(round(n * options.tdist)))
+            l = l[0 : m]
+        mvec.append(len(l))
+        targets[rnodeid] = l
+    sys.stderr.write('Average number of targets: %f\n' %(float(sum(mvec)) / len(mvec)))
+    return targets
+
 def generate_kpn(options):
     if options.cevents <= 0:
         die('Invalid number of computation events: %d\n' %(options.cevents))
@@ -136,6 +154,8 @@ def generate_kpn(options):
         die('Invalid computation b value: %f\n' %(options.cb))
     if options.wb < 0 or options.wb > 1:
         die('Invalid communication b value: %f\n' %(options.wb))
+    if options.tdist != None and (options.tdist <= 0 or options.tdist > 1.0):
+        die('Invalid target distribution value: %f\n' %(options.tdist))
 
     nodes = map(lambda i: Node(i), range(options.nnodes))
 
@@ -148,6 +168,8 @@ def generate_kpn(options):
     links = []
     for nodeid in xrange(len(nodes)):
         links.append({})
+
+    targets = gen_targets(len(nodes), options)
 
     cevents = 0
     wevents = 0
@@ -166,7 +188,7 @@ def generate_kpn(options):
             if options.acyclic:
                 dnodeid = acyclic_destination(rnodeid, len(nodes), links)
             else:
-                dnodeid = randrangexor(0, len(nodes), rnodeid)
+                dnodeid = choice(targets[rnodeid])
             if dnodeid == None:
                 continue
             writelocked = False
