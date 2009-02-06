@@ -17,6 +17,17 @@ def b_model_time_series(b, N, T):
 
     If b == 0 or b == 1, all mass is put into a single piece.
     If b == 0.5, all mass is divided equally among pieces.
+
+    See following publications for more information:
+
+    * R. Thid, I. Sander, and A. Jantsch,
+      'Flexible bus and noc performance analysis with configurable synthetic
+      workloads', DSD, 2006, pp. 681­688.
+
+    * M. Wang, N. H. Chan, S. Papadimitriou, C. Faloutsos, and T. Madhyastha,
+      'Data mining meets performance evaluation: Fast algorithms for modeling
+      bursty traffic', International Conference on Data Engineering,
+      Feb. 2002, pp. 507­516.
     """
 
     # Input checking
