@@ -22,12 +22,12 @@ def b_model_time_series(b, N, T):
 
     * R. Thid, I. Sander, and A. Jantsch,
       'Flexible bus and noc performance analysis with configurable synthetic
-      workloads', DSD, 2006, pp. 681­688.
+      workloads', DSD, 2006, pp. 681-688.
 
     * M. Wang, N. H. Chan, S. Papadimitriou, C. Faloutsos, and T. Madhyastha,
       'Data mining meets performance evaluation: Fast algorithms for modeling
       bursty traffic', International Conference on Data Engineering,
-      Feb. 2002, pp. 507­516.
+      Feb. 2002, pp. 507-516.
     """
 
     # Input checking
