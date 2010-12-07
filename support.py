@@ -15,3 +15,9 @@ def randrangexor(a, b, n):
         x += 1
 
     return x
+
+def xint(s, default=None):
+    try:
+        return int(s)
+    except ValueError:
+        return default

@@ -1,0 +1,123 @@
+#!/usr/bin/env python
+
+import sys
+
+from support import die, xint
+
+class Compute_Inst:
+    def __init__(self, instid, ncycles):
+        assert(ncycles > 0)
+        self.instid = instid
+        self.op = 'c'
+        self.ncycles = ncycles
+
+    def check(self, tasks):
+        return True
+
+class Read_Inst:
+    def __init__(self, instid, source):
+        self.instid = instid
+        self.op = 'r'
+        self.source = source
+
+    def check(self, tasks):
+        return tasks.has_key(self.source)
+
+class Write_Inst:
+    def __init__(self, instid, target, size):
+        assert(size > 0)
+        self.instid = instid
+        self.op = 'w'
+        self.target = target
+        self.size = size
+
+    def check(self, tasks):
+        return tasks.has_key(self.target)
+
+def main():
+    assert(len(sys.argv) == 2)
+    fname = sys.argv[1]
+    try:
+        f = open(fname)
+    except IOError:
+        die('Can not open %s\n' % fname)
+
+    instid = 0
+    tasks = {}
+    for line in f.readlines():
+        fields = line.split()
+        if fields[0] != 'node':
+            continue
+        assert(len(fields) >= 3)
+        taskid = xint(fields[1])
+        ninsts = xint(fields[2])
+        fidx = 3
+        assert(tasks.has_key(taskid) == False)
+        tasks[taskid] = []
+        for i in xrange(ninsts):
+            assert(fidx < len(fields))
+            inst = fields[fidx]
+            if inst == 'c':
+                assert((fidx + 1) < len(fields))
+                ncycles = xint(fields[fidx + 1])
+                inst = Compute_Inst(instid, ncycles)
+                fidx += 2
+            elif inst == 'r':
+                assert((fidx + 1) < len(fields))
+                sourcetask = xint(fields[fidx + 1])
+                inst = Read_Inst(instid, sourcetask)
+                fidx += 2
+            elif inst == 'w':
+                assert((fidx + 2) < len(fields))
+                targettask = xint(fields[fidx + 1])
+                size = xint(fields[fidx + 2])
+                inst = Write_Inst(instid, targettask, size)
+                fidx += 3
+            else:
+                assert False
+            tasks[taskid].append(inst)
+            instid += 1
+
+    for (taskid, instlist) in tasks.items():
+        for inst in instlist:
+            if not inst.check(tasks):
+                die('Task %d inst %d check failed: %s\n' % (taskid, inst.instid, str(inst)))
+
+    sys.stdout.write('digraph kpn {\n')
+
+    colorlist = ['black', 'red', 'green', 'blue', 'brown', 'gray', 'violet', 'purple']
+    coloridx = 0
+
+    for instlist in tasks.values():
+        for inst in instlist:
+            color = colorlist[coloridx]
+            sys.stdout.write('\tinst%d [label=\"%s\" color=\"%s\"];\n' % (inst.instid, inst.op, color))
+
+        coloridx = (coloridx + 1) % len(colorlist)
+
+    for (taskid, instlist) in tasks.items():
+        itargets = {}
+        for idx in xrange(len(instlist)):
+            inst = instlist[idx]
+
+            if (idx + 1) < len(instlist):
+                nextinst = instlist[idx + 1]
+                sys.stdout.write('\tinst%d -> inst%d [dir="none"];\n' % (inst.instid, nextinst.instid))
+
+            if inst.op != 'w':
+                continue
+            targetinstlist = tasks[inst.target]
+            targetinstidx = itargets.setdefault(inst.target, 0)
+            while targetinstidx < len(targetinstlist):
+                targetinst = targetinstlist[targetinstidx]
+                targetinstidx += 1
+                if targetinst.op == 'r' and targetinst.source == taskid:
+                    sys.stdout.write('\tinst%d -> inst%d;\n' % (inst.instid, targetinst.instid))
+                    break
+            itargets[inst.target] = targetinstidx
+
+    sys.stdout.write('}\n')
+    f.close()
+
+if __name__ == '__main__':
+    main()
